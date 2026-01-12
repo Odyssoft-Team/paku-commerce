@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
 	servicedomain "paku-commerce/internal/commerce/service/domain"
@@ -20,10 +21,11 @@ var (
 
 // CheckoutQuote contiene la cotización completa del checkout.
 type CheckoutQuote struct {
-	Quote         pricingdomain.Quote
-	Discounts     []promotionsusecases.DiscountLine
-	TotalDiscount pricingdomain.Money
-	Total         pricingdomain.Money
+	OriginalSubtotal pricingdomain.Money
+	Quote            pricingdomain.Quote
+	Discounts        []promotionsusecases.DiscountLine
+	TotalDiscount    pricingdomain.Money
+	Total            pricingdomain.Money
 }
 
 // QuoteCheckoutInput contiene la intención de compra.
@@ -72,6 +74,9 @@ func (uc QuoteCheckout) Execute(ctx context.Context, input QuoteCheckoutInput) (
 		return QuoteCheckoutOutput{}, err
 	}
 
+	// Guardar subtotal original (antes de descuentos)
+	originalSubtotal := priceOutput.Quote.Subtotal
+
 	// 4. Aplicar promociones/cupón
 	promoInput := promotionsusecases.ApplyDiscountsInput{
 		Quote:      priceOutput.Quote,
@@ -88,10 +93,11 @@ func (uc QuoteCheckout) Execute(ctx context.Context, input QuoteCheckoutInput) (
 
 	return QuoteCheckoutOutput{
 		Quote: CheckoutQuote{
-			Quote:         promoOutput.AdjustedQuote,
-			Discounts:     promoOutput.Discounts,
-			TotalDiscount: promoOutput.TotalDiscount,
-			Total:         total,
+			OriginalSubtotal: originalSubtotal,
+			Quote:            promoOutput.AdjustedQuote,
+			Discounts:        promoOutput.Discounts,
+			TotalDiscount:    promoOutput.TotalDiscount,
+			Total:            total,
 		},
 	}, nil
 }
@@ -116,7 +122,7 @@ func (uc QuoteCheckout) validateItems(ctx context.Context, intent checkoutdomain
 		if item.ItemType == checkoutdomain.ItemTypeService {
 			service, err := uc.ServiceRepo.GetServiceByID(ctx, item.ItemID)
 			if err != nil {
-				return ErrUnknownService
+				return fmt.Errorf("%w: %w", ErrUnknownService, err)
 			}
 
 			// Validar elegibilidad

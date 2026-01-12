@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
@@ -56,13 +57,18 @@ func (uc CreateOrder) Execute(ctx context.Context, input CreateOrderInput) (Crea
 		now = uc.Now()
 	}
 
+	orderID, err := generateOrderID()
+	if err != nil {
+		return CreateOrderOutput{}, fmt.Errorf("failed to generate order ID: %w", err)
+	}
+
 	order := checkoutdomain.Order{
-		ID:            generateOrderID(), // TODO: usar internal/platform/id si existe
+		ID:            orderID,
 		Status:        checkoutdomain.OrderStatusPendingPayment,
 		CreatedAt:     now,
 		PetProfile:    input.Intent.PetProfile,
 		Items:         orderItems,
-		Subtotal:      quote.Quote.Subtotal, // Subtotal original antes de descuentos
+		Subtotal:      quote.OriginalSubtotal, // Subtotal original antes de descuentos
 		TotalDiscount: quote.TotalDiscount,
 		Total:         quote.Total,
 		CouponCode:    input.Intent.CouponCode,
@@ -80,8 +86,11 @@ func (uc CreateOrder) Execute(ctx context.Context, input CreateOrderInput) (Crea
 
 // generateOrderID genera un ID único para la orden.
 // TODO: usar internal/platform/id si existe
-func generateOrderID() string {
+func generateOrderID() (string, error) {
 	b := make([]byte, 16)
-	rand.Read(b)
-	return "order_" + hex.EncodeToString(b)
+	if _, err := rand.Read(b); err != nil {
+		// Fallback a timestamp-based ID si falla random
+		return fmt.Sprintf("order_%d", time.Now().UnixNano()), nil
+	}
+	return "order_" + hex.EncodeToString(b), nil
 }
