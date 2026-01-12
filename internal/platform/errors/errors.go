@@ -1,3 +1,3 @@
 package errors
 
-// TODO: Agregar errores tipados de dominio según se necesiten
+// TODO: Errores comunes de plataforma (si se necesitan en el futuro).
