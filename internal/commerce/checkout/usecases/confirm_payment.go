@@ -35,12 +35,22 @@ func (uc ConfirmPayment) Execute(ctx context.Context, input ConfirmPaymentInput)
 		return ConfirmPaymentOutput{}, err
 	}
 
+	// Determinar timestamp de pago
+	paidAt := input.PaidAt
+	if paidAt.IsZero() {
+		if uc.Now != nil {
+			paidAt = uc.Now()
+		} else {
+			paidAt = time.Now()
+		}
+	}
+
 	// 2. Intentar marcar como pagada (idempotente)
 	wasAlreadyPaid := order.Status == checkoutdomain.OrderStatusPaid &&
 		order.PaymentRef != nil &&
 		*order.PaymentRef == input.PaymentRef
 
-	err = order.MarkPaid(input.PaymentRef, input.PaidAt)
+	err = order.MarkPaid(input.PaymentRef, paidAt)
 	if err != nil {
 		return ConfirmPaymentOutput{}, err
 	}
@@ -53,7 +63,7 @@ func (uc ConfirmPayment) Execute(ctx context.Context, input ConfirmPaymentInput)
 	// 4. Confirmar hold de booking si existe (solo en transición real)
 	if order.BookingHoldID != nil && *order.BookingHoldID != "" {
 		if err := uc.Booking.ConfirmHold(ctx, *order.BookingHoldID); err != nil {
-			// Revertir estado si booking falla (no persistir paid)
+			// No persistir cambios si booking falla
 			// TODO: confirm with architect si preferimos estrategia de compensación
 			return ConfirmPaymentOutput{}, err
 		}
