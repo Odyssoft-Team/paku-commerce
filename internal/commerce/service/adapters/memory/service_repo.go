@@ -16,8 +16,6 @@ type ServiceRepository struct {
 
 // NewServiceRepository crea un repositorio con datos de ejemplo.
 func NewServiceRepository() *ServiceRepository {
-	// Helper para weight pointer
-	intPtr := func(v int) *int { return &v }
 
 	services := []domain.Service{
 		{
