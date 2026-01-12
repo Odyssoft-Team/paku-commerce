@@ -40,3 +40,16 @@ func (r *OrderRepository) GetByID(ctx context.Context, id string) (domain.Order,
 	}
 	return order, nil
 }
+
+// Update actualiza una orden existente.
+func (r *OrderRepository) Update(ctx context.Context, order domain.Order) (domain.Order, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.orders[order.ID]; !exists {
+		return domain.Order{}, domain.ErrOrderNotFound
+	}
+
+	r.orders[order.ID] = order
+	return order, nil
+}
