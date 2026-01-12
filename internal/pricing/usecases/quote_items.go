@@ -49,7 +49,7 @@ func (uc QuoteItems) Execute(ctx context.Context, input QuoteItemsInput) (QuoteI
 		// Seleccionar regla aplicable
 		var selectedRule *pricingdomain.PriceRule
 		if reqItem.ItemType == pricingdomain.ItemTypeService {
-			selectedRule = selectServiceRule(rules, input.PetProfile)
+			selectedRule = selectServiceRule(rules, reqItem.ItemID, input.PetProfile)
 		} else if reqItem.ItemType == pricingdomain.ItemTypeProduct {
 			selectedRule = selectProductRule(rules)
 		}
@@ -86,10 +86,10 @@ func (uc QuoteItems) Execute(ctx context.Context, input QuoteItemsInput) (QuoteI
 }
 
 // selectServiceRule elige la regla más específica que matchea el pet.
-func selectServiceRule(rules []pricingdomain.PriceRule, pet domain.PetProfile) *pricingdomain.PriceRule {
+func selectServiceRule(rules []pricingdomain.PriceRule, itemID string, pet domain.PetProfile) *pricingdomain.PriceRule {
 	var matching []pricingdomain.PriceRule
 	for _, rule := range rules {
-		if rule.MatchesService(rule.ItemID, pet) {
+		if rule.MatchesService(itemID, pet) {
 			matching = append(matching, rule)
 		}
 	}

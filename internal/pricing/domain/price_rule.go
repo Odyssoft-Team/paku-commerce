@@ -1,6 +1,6 @@
 package domain
 
-import "paku-commerce/internal/commerce/service/domain"
+import servicedomain "paku-commerce/internal/commerce/service/domain"
 
 // ItemType identifica el tipo de item a cotizar.
 type ItemType string
@@ -20,7 +20,7 @@ type PriceRule struct {
 }
 
 // MatchesService evalúa si la regla aplica al servicio dado con el pet profile.
-func (r PriceRule) MatchesService(itemID string, pet domain.PetProfile) bool {
+func (r PriceRule) MatchesService(itemID string, pet servicedomain.PetProfile) bool {
 	if r.ItemType != ItemTypeService {
 		return false
 	}
