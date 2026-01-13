@@ -1,9 +1,9 @@
 package http
 
 import (
-	checkoutmemory "paku-commerce/internal/commerce/checkout/adapters/memory"
 	bookingstub "paku-commerce/internal/commerce/checkout/ports/booking"
 	checkoutusecases "paku-commerce/internal/commerce/checkout/usecases"
+	"paku-commerce/internal/commerce/runtime"
 	servicememory "paku-commerce/internal/commerce/service/adapters/memory"
 	pricingmemory "paku-commerce/internal/pricing/adapters/memory"
 	pricingusecases "paku-commerce/internal/pricing/usecases"
@@ -13,11 +13,12 @@ import (
 
 // WireCheckoutHandlers construye todas las dependencias y retorna handlers.
 func WireCheckoutHandlers() *CheckoutHandlers {
-	// Repos
+	// Repos (singletons)
 	serviceRepo := servicememory.NewServiceRepository()
 	priceRuleRepo := pricingmemory.NewPriceRuleRepository()
 	promotionsRepo := promotionsmemory.NewPromotionsRepository()
-	orderRepo := checkoutmemory.NewOrderRepository()
+	orderRepo := runtime.OrderRepoSingleton
+	cartRepo := runtime.CartRepoSingleton
 
 	// Booking stub (no-op)
 	bookingClient := &bookingstub.StubBookingClient{}
@@ -51,9 +52,16 @@ func WireCheckoutHandlers() *CheckoutHandlers {
 		Now:     nil, // usa time.Now() por defecto
 	}
 
+	startCheckoutUC := &checkoutusecases.StartCheckout{
+		CartRepo:      cartRepo,
+		Booking:       bookingClient,
+		CreateOrderUC: createOrderUC,
+	}
+
 	return &CheckoutHandlers{
 		QuoteCheckoutUC:  quoteCheckoutUC,
 		CreateOrderUC:    createOrderUC,
 		ConfirmPaymentUC: confirmPaymentUC,
+		StartCheckoutUC:  startCheckoutUC,
 	}
 }

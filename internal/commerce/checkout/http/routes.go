@@ -10,5 +10,6 @@ func RegisterRoutes(r chi.Router, handlers *CheckoutHandlers) {
 		r.Post("/quote", handlers.HandleQuote)
 		r.Post("/orders", handlers.HandleCreateOrder)
 		r.Post("/orders/{id}/confirm-payment", handlers.HandleConfirmPayment)
+		r.Post("/start", handlers.HandleStartCheckout)
 	})
 }

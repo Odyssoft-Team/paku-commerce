@@ -3,6 +3,7 @@ package http
 import (
 	"time"
 
+	cartdomain "paku-commerce/internal/commerce/cart/domain"
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
 	servicedomain "paku-commerce/internal/commerce/service/domain"
 	pricingdomain "paku-commerce/internal/pricing/domain"
@@ -96,6 +97,27 @@ type ConfirmPaymentResponseDTO struct {
 	Order OrderDTO `json:"order"`
 }
 
+// StartCheckoutRequestDTO es el request para POST /checkout/start.
+type StartCheckoutRequestDTO struct {
+	SlotID string `json:"slot_id"`
+}
+
+// CartSnapshotDTO es una versión simplificada del cart para response.
+type CartSnapshotDTO struct {
+	ID            string  `json:"id"`
+	UserID        string  `json:"user_id"`
+	BookingHoldID *string `json:"booking_hold_id,omitempty"`
+	OrderID       *string `json:"order_id,omitempty"`
+	ExpiresAt     string  `json:"expires_at"`
+}
+
+// StartCheckoutResponseDTO es el response para POST /checkout/start.
+type StartCheckoutResponseDTO struct {
+	BookingHoldID string          `json:"booking_hold_id"`
+	Order         OrderDTO        `json:"order"`
+	Cart          CartSnapshotDTO `json:"cart"`
+}
+
 // toPetProfile convierte DTO a dominio.
 func (dto PetProfileDTO) toPetProfile() servicedomain.PetProfile {
 	return servicedomain.PetProfile{
@@ -158,4 +180,15 @@ func toOrderDTO(order checkoutdomain.Order) OrderDTO {
 	}
 
 	return dto
+}
+
+// toCartSnapshotDTO convierte Cart a CartSnapshotDTO.
+func toCartSnapshotDTO(cart cartdomain.Cart) CartSnapshotDTO {
+	return CartSnapshotDTO{
+		ID:            cart.ID,
+		UserID:        cart.UserID,
+		BookingHoldID: cart.BookingHoldID,
+		OrderID:       cart.OrderID,
+		ExpiresAt:     cart.ExpiresAt.Format(time.RFC3339),
+	}
 }

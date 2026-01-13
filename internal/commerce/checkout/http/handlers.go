@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	cartdomain "paku-commerce/internal/commerce/cart/domain"
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
 	checkoutusecases "paku-commerce/internal/commerce/checkout/usecases"
 )
@@ -16,6 +17,7 @@ type CheckoutHandlers struct {
 	QuoteCheckoutUC  *checkoutusecases.QuoteCheckout
 	CreateOrderUC    *checkoutusecases.CreateOrder
 	ConfirmPaymentUC *checkoutusecases.ConfirmPayment
+	StartCheckoutUC  *checkoutusecases.StartCheckout
 }
 
 // HandleQuote maneja POST /checkout/quote.
@@ -159,6 +161,53 @@ func (h *CheckoutHandlers) HandleConfirmPayment(w http.ResponseWriter, r *http.R
 	}
 
 	respondJSON(w, http.StatusOK, resp)
+}
+
+// HandleStartCheckout maneja POST /checkout/start.
+func (h *CheckoutHandlers) HandleStartCheckout(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("X-User-ID")
+	if userID == "" {
+		respondError(w, http.StatusBadRequest, "X-User-ID header is required")
+		return
+	}
+
+	var req StartCheckoutRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+
+	if req.SlotID == "" {
+		respondError(w, http.StatusBadRequest, "slot_id is required")
+		return
+	}
+
+	input := checkoutusecases.StartCheckoutInput{
+		UserID: userID,
+		SlotID: req.SlotID,
+	}
+
+	output, err := h.StartCheckoutUC.Execute(r.Context(), input)
+	if err != nil {
+		status := mapStartCheckoutErrorToHTTPStatus(err)
+		respondError(w, status, err.Error())
+		return
+	}
+
+	resp := StartCheckoutResponseDTO{
+		BookingHoldID: output.BookingHoldID,
+		Order:         toOrderDTO(output.Order),
+		Cart:          toCartSnapshotDTO(output.Cart),
+	}
+
+	respondJSON(w, http.StatusOK, resp)
+}
+
+func mapStartCheckoutErrorToHTTPStatus(err error) int {
+	if err == cartdomain.ErrCartNotFound || err == cartdomain.ErrInvalidUserID || err == cartdomain.ErrEmptyItems {
+		return http.StatusBadRequest
+	}
+	return http.StatusInternalServerError
 }
 
 // respondJSON escribe una respuesta JSON.

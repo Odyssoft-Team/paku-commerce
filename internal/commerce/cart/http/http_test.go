@@ -9,13 +9,13 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-
-	checkoutmemory "paku-commerce/internal/commerce/checkout/adapters/memory"
+	//checkoutmemory "paku-commerce/internal/commerce/checkout/adapters/memory"
 )
 
 func setupTestCartRouter() http.Handler {
-	orderRepo := checkoutmemory.NewOrderRepository()
-	handlers := WireCartHandlers(orderRepo)
+	//orderRepo := checkoutmemory.NewOrderRepository()
+	//handlers := WireCartHandlers(orderRepo)
+	handlers := WireCartHandlers()
 
 	r := chi.NewRouter()
 	RegisterRoutes(r, handlers)
