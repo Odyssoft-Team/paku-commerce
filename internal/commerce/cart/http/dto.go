@@ -47,9 +47,25 @@ type CartResponseDTO struct {
 	Cart CartDTO `json:"cart"`
 }
 
-// ErrorResponse representa un error HTTP.
+// ExpireRequestDTO es el request opcional para POST /cart/expire.
+type ExpireRequestDTO struct {
+	Now *string `json:"now,omitempty"` // RFC3339
+}
+
+// ExpireResponseDTO es el response para POST /cart/expire.
+type ExpireResponseDTO struct {
+	ExpiredCount int `json:"expired_count"`
+}
+
+// ErrorDTO representa los detalles de un error.
+type ErrorDTO struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+// ErrorResponse representa un error HTTP con código y mensaje.
 type ErrorResponse struct {
-	Error string `json:"error"`
+	Error ErrorDTO `json:"error"`
 }
 
 func (dto PetProfileDTO) toPetProfile() servicedomain.PetProfile {

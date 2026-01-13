@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	cartdomain "paku-commerce/internal/commerce/cart/domain"
 	cartusecases "paku-commerce/internal/commerce/cart/usecases"
@@ -21,19 +22,19 @@ type CartHandlers struct {
 func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		respondError(w, http.StatusBadRequest, "X-User-ID header is required")
+		respondError(w, http.StatusBadRequest, "bad_request", "X-User-ID header is required")
 		return
 	}
 
 	var req UpsertCartRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondError(w, http.StatusBadRequest, "invalid JSON")
+		respondError(w, http.StatusBadRequest, "bad_request", "invalid JSON")
 		return
 	}
 
 	// Validaciones básicas
 	if len(req.Items) == 0 {
-		respondError(w, http.StatusBadRequest, "items cannot be empty")
+		respondError(w, http.StatusBadRequest, "bad_request", "items cannot be empty")
 		return
 	}
 
@@ -47,7 +48,8 @@ func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) 
 
 	output, err := h.UpsertCartUC.Execute(r.Context(), input)
 	if err != nil {
-		respondError(w, mapErrorToHTTPStatus(err), err.Error())
+		code, msg := mapErrorToCodeAndMessage(err)
+		respondError(w, mapErrorToHTTPStatus(err), code, msg)
 		return
 	}
 
@@ -59,14 +61,15 @@ func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) 
 func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		respondError(w, http.StatusBadRequest, "X-User-ID header is required")
+		respondError(w, http.StatusBadRequest, "bad_request", "X-User-ID header is required")
 		return
 	}
 
 	input := cartusecases.GetCartInput{UserID: userID}
 	output, err := h.GetCartUC.Execute(r.Context(), input)
 	if err != nil {
-		respondError(w, mapErrorToHTTPStatus(err), err.Error())
+		code, msg := mapErrorToCodeAndMessage(err)
+		respondError(w, mapErrorToHTTPStatus(err), code, msg)
 		return
 	}
 
@@ -78,18 +81,55 @@ func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 func (h *CartHandlers) HandleDeleteCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
-		respondError(w, http.StatusBadRequest, "X-User-ID header is required")
+		respondError(w, http.StatusBadRequest, "bad_request", "X-User-ID header is required")
 		return
 	}
 
 	input := cartusecases.DeleteCartInput{UserID: userID}
 	_, err := h.DeleteCartUC.Execute(r.Context(), input)
 	if err != nil {
-		respondError(w, mapErrorToHTTPStatus(err), err.Error())
+		code, msg := mapErrorToCodeAndMessage(err)
+		respondError(w, mapErrorToHTTPStatus(err), code, msg)
 		return
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// HandleExpireCarts maneja POST /cart/expire.
+func (h *CartHandlers) HandleExpireCarts(w http.ResponseWriter, r *http.Request) {
+	var req ExpireRequestDTO
+
+	// Body opcional: si no hay body o está vacío, no fallar
+	if r.Body != nil {
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err.Error() != "EOF" {
+			respondError(w, http.StatusBadRequest, "bad_request", "invalid JSON")
+			return
+		}
+	}
+
+	// Determinar timestamp
+	now := time.Now()
+	if req.Now != nil && *req.Now != "" {
+		parsed, err := time.Parse(time.RFC3339, *req.Now)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, "bad_request", "invalid now format (use RFC3339)")
+			return
+		}
+		now = parsed
+	}
+
+	// Ejecutar usecase
+	input := cartusecases.ExpireCartsInput{Now: now}
+	output, err := h.ExpireCartsUC.Execute(r.Context(), input)
+	if err != nil {
+		code, msg := mapErrorToCodeAndMessage(err)
+		respondError(w, mapErrorToHTTPStatus(err), code, msg)
+		return
+	}
+
+	resp := ExpireResponseDTO{ExpiredCount: output.ExpiredCount}
+	respondJSON(w, http.StatusOK, resp)
 }
 
 func mapErrorToHTTPStatus(err error) int {
@@ -102,12 +142,27 @@ func mapErrorToHTTPStatus(err error) int {
 	return http.StatusInternalServerError
 }
 
+func mapErrorToCodeAndMessage(err error) (string, string) {
+	if errors.Is(err, cartdomain.ErrCartNotFound) {
+		return "not_found", err.Error()
+	}
+	if errors.Is(err, cartdomain.ErrInvalidUserID) || errors.Is(err, cartdomain.ErrEmptyItems) {
+		return "bad_request", err.Error()
+	}
+	return "internal", "internal server error"
+}
+
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
 }
 
-func respondError(w http.ResponseWriter, status int, message string) {
-	respondJSON(w, status, ErrorResponse{Error: message})
+func respondError(w http.ResponseWriter, status int, code string, message string) {
+	respondJSON(w, status, ErrorResponse{
+		Error: ErrorDTO{
+			Code:    code,
+			Message: message,
+		},
+	})
 }

@@ -10,5 +10,6 @@ func RegisterRoutes(r chi.Router, handlers *CartHandlers) {
 		r.Put("/me", handlers.HandleUpsertCart)
 		r.Get("/me", handlers.HandleGetCart)
 		r.Delete("/me", handlers.HandleDeleteCart)
+		r.Post("/expire", handlers.HandleExpireCarts)
 	})
 }
