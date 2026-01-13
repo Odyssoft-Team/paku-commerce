@@ -1,8 +1,8 @@
 package http
 
 import (
-	bookingstub "paku-commerce/internal/commerce/checkout/ports/booking"
 	checkoutusecases "paku-commerce/internal/commerce/checkout/usecases"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 	"paku-commerce/internal/commerce/runtime"
 	servicememory "paku-commerce/internal/commerce/service/adapters/memory"
 	pricingmemory "paku-commerce/internal/pricing/adapters/memory"
@@ -21,7 +21,7 @@ func WireCheckoutHandlers() *CheckoutHandlers {
 	cartRepo := runtime.CartRepoSingleton
 
 	// Booking stub (no-op)
-	bookingClient := &bookingstub.StubBookingClient{}
+	bookingClient := &platformbooking.StubClient{}
 
 	// Usecases: pricing
 	quoteItemsUC := &pricingusecases.QuoteItems{

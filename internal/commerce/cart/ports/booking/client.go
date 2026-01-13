@@ -1,9 +1,7 @@
 package booking
 
-import "context"
+import platformbooking "paku-commerce/internal/commerce/platform/booking"
 
-// BookingClient define operaciones de booking para cart.
-type BookingClient interface {
-	// CancelHold cancela un hold de booking.
-	CancelHold(ctx context.Context, holdID string) error
-}
+// BookingClient es un alias del interface unificado en platform/booking.
+// Deprecated: usar directamente platform/booking.Client
+type BookingClient = platformbooking.Client

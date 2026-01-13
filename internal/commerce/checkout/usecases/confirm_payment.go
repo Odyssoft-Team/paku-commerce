@@ -5,7 +5,7 @@ import (
 	"time"
 
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
-	bookingports "paku-commerce/internal/commerce/checkout/ports/booking"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 )
 
 // ConfirmPaymentInput contiene los datos de confirmación de pago.
@@ -23,7 +23,7 @@ type ConfirmPaymentOutput struct {
 // ConfirmPayment confirma el pago de una orden de forma idempotente.
 type ConfirmPayment struct {
 	Repo    checkoutdomain.OrderRepository
-	Booking bookingports.BookingClient
+	Booking platformbooking.Client
 	Now     func() time.Time
 }
 

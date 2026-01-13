@@ -3,11 +3,10 @@ package http
 import (
 	"context"
 
-	bookingports "paku-commerce/internal/commerce/cart/ports/booking"
 	checkoutports "paku-commerce/internal/commerce/cart/ports/checkout"
 	cartusecases "paku-commerce/internal/commerce/cart/usecases"
-	bookingstub "paku-commerce/internal/commerce/checkout/ports/booking"
 	checkoutusecases "paku-commerce/internal/commerce/checkout/usecases"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 	"paku-commerce/internal/commerce/runtime"
 )
 
@@ -22,11 +21,22 @@ func (c *InProcessCheckoutClient) CancelOrder(ctx context.Context, orderID strin
 	return err
 }
 
-// InProcessBookingClient implementa bookingports.BookingClient (stub no-op).
+// InProcessBookingClient implementa platform booking.Client (stub no-op).
 type InProcessBookingClient struct{}
 
+func (c *InProcessBookingClient) CreateHold(ctx context.Context, slotID string) (string, error) {
+	return "", nil // stub
+}
+
+func (c *InProcessBookingClient) ValidateHold(ctx context.Context, holdID string) error {
+	return nil
+}
+
+func (c *InProcessBookingClient) ConfirmHold(ctx context.Context, holdID string) error {
+	return nil
+}
+
 func (c *InProcessBookingClient) CancelHold(ctx context.Context, holdID string) error {
-	// Stub: no-op por ahora
 	return nil
 }
 
@@ -36,12 +46,12 @@ func WireCartHandlers() *CartHandlers {
 	orderRepo := runtime.OrderRepoSingleton
 
 	// Port: booking (stub)
-	var bookingClient bookingports.BookingClient = &InProcessBookingClient{}
+	var bookingClient platformbooking.Client = &InProcessBookingClient{}
 
 	// Port: checkout (in-process)
 	cancelOrderUC := &checkoutusecases.CancelOrder{
 		Repo:    orderRepo,
-		Booking: &bookingstub.StubBookingClient{},
+		Booking: &platformbooking.StubClient{},
 	}
 	var checkoutClient checkoutports.CheckoutClient = &InProcessCheckoutClient{CancelOrderUC: cancelOrderUC}
 

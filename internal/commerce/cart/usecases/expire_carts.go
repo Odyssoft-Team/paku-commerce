@@ -5,8 +5,8 @@ import (
 	"time"
 
 	cartdomain "paku-commerce/internal/commerce/cart/domain"
-	bookingports "paku-commerce/internal/commerce/cart/ports/booking"
 	checkoutports "paku-commerce/internal/commerce/cart/ports/checkout"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 )
 
 // ExpireCartsInput contiene el timestamp de referencia.
@@ -22,7 +22,7 @@ type ExpireCartsOutput struct {
 // ExpireCarts limpia carritos vencidos y ejecuta side-effects.
 type ExpireCarts struct {
 	Repo     cartdomain.CartRepository
-	Booking  bookingports.BookingClient
+	Booking  platformbooking.Client
 	Checkout checkoutports.CheckoutClient
 }
 

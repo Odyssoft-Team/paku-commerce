@@ -1,4 +1,4 @@
-# INTEGRATION_BOOKING (paku-commerce ↔ ms-booking)
+# INTEGRATION_BOOKING (paku-commerce ↔ paku-booking)
 
 ## 1) Contexto
 
@@ -12,6 +12,13 @@ El hold es una reserva temporal del slot que impide que otros usuarios lo reserv
 - Se confirme el pago (se convierte en booking real)
 - Expire el TTL del carrito (90 min)
 - Se cancele explícitamente
+
+**Integración actual:**
+- Port unificado: `internal/commerce/platform/booking.Client`
+- Implementaciones:
+  - `platform/booking.StubClient` (desarrollo, no-op)
+  - `checkout/adapters/bookinghttp.Client` (producción, HTTP)
+- Cart y Checkout usan el mismo contrato de booking
 
 ---
 
@@ -35,19 +42,22 @@ El hold es una reserva temporal del slot que impide que otros usuarios lo reserv
 **Proceso interno:**
 1. paku-commerce carga el cart del usuario (ya contiene pet_profile + items)
 2. Valida que el cart tenga items de servicios (no productos)
-3. Si cart tiene booking_hold_id previo → CancelHold(old_hold_id)
-4. Llama `booking.CreateHold(...)` con datos del cart
+3. Si cart tiene booking_hold_id previo → `CancelHold(old_hold_id)`
+4. Llama `booking.CreateHold(ctx, slotID)` (port: `platform/booking.Client`)
 
-**Datos enviados a booking (CreateHold):**
+**Datos enviados a paku-booking (CreateHold):**
 - `slot_id`: desde request
-- `user_id`: desde X-User-ID header
-- `service_items`: desde cart.Items (filtrar solo ItemTypeService)
-  - `[{service_id, qty}]`
-- `request_id`: X-Request-ID (para idempotencia)
-- **PENDING:** `pet_profile` (species, weight_kg, coat_type) - si booking lo requiere para validación de capacidad
-- **PENDING:** `tenant_id` - para multi-tenant futuro
+- `user_id`: desde X-User-ID header (en adapter HTTP)
+- `service_items`: desde cart.Items (en adapter HTTP)
+- `request_id`: X-Request-ID (en adapter HTTP)
+- **PENDING:** `pet_profile`, `tenant_id` (agregados por adapter cuando se definan)
 
-**Response booking (CreateHold):**
+**Port signature actual:**
+```go
+CreateHold(ctx context.Context, slotID string) (holdID string, error)
+```
+
+**Response paku-booking (esperado):**
 ```json
 {
   "hold_id": "hold_xyz789",
@@ -77,17 +87,22 @@ El hold es una reserva temporal del slot que impide que otros usuarios lo reserv
 **Proceso interno:**
 1. ExpireCarts usecase busca carts vencidos (now > cart.ExpiresAt)
 2. Para cada cart vencido con booking_hold_id:
-   - Llama `booking.CancelHold(hold_id)` (best-effort)
+   - Llama `booking.CancelHold(ctx, hold_id)` (best-effort)
    - Si falla: loggear pero no bloquear
 3. Llama `checkout.CancelOrder(order_id)` (best-effort)
 4. Elimina cart de repo
 
-**Datos enviados a booking (CancelHold):**
-- `hold_id`: desde cart.BookingHoldID
-- `reason`: "cart_expired" (opcional)
-- `request_id`: X-Request-ID (para trazabilidad)
+**Port signature actual:**
+```go
+CancelHold(ctx context.Context, holdID string) error
+```
 
-**Response booking (CancelHold):**
+**Datos enviados a paku-booking (CancelHold):**
+- `hold_id`: desde cart.BookingHoldID
+- `reason`: "cart_expired" (opcional, agregado por adapter HTTP)
+- `request_id`: X-Request-ID (agregado por adapter HTTP)
+
+**Response paku-booking (esperado):**
 ```json
 {
   "status": "cancelled"
@@ -121,17 +136,22 @@ El hold es una reserva temporal del slot que impide que otros usuarios lo reserv
 1. ConfirmPayment usecase carga order
 2. Marca order como paid (idempotente por payment_ref)
 3. Si order.BookingHoldID != nil:
-   - Llama `booking.ConfirmHold(hold_id)`
+   - Llama `booking.ConfirmHold(ctx, hold_id)` (port: `platform/booking.Client`)
    - Si falla: NO persistir order como paid, retornar error
 4. Persiste order con status=paid
 
-**Datos enviados a booking (ConfirmHold):**
-- `hold_id`: desde order.BookingHoldID
-- `order_id`: order.ID (para correlación)
-- `payment_ref`: input.PaymentRef (para trazabilidad)
-- `request_id`: X-Request-ID (para idempotencia)
+**Port signature actual:**
+```go
+ConfirmHold(ctx context.Context, holdID string) error
+```
 
-**Response booking (ConfirmHold):**
+**Datos enviados a paku-booking (ConfirmHold):**
+- `hold_id`: desde order.BookingHoldID
+- `order_id`: order.ID (agregado por adapter HTTP)
+- `payment_ref`: input.PaymentRef (agregado por adapter HTTP)
+- `request_id`: X-Request-ID (agregado por adapter HTTP)
+
+**Response paku-booking (esperado):**
 ```json
 {
   "booking_id": "booking_real_123",
@@ -162,12 +182,21 @@ El hold es una reserva temporal del slot que impide que otros usuarios lo reserv
 
 ## 3) Contrato de datos detallado
 
-### 3.1 CreateHold
+### Port actual (paku-commerce)
 
-**Method signature (port):**
 ```go
-CreateHold(ctx context.Context, slotID string) (holdID string, error)
+// internal/commerce/platform/booking.Client
+type Client interface {
+	CreateHold(ctx context.Context, slotID string) (holdID string, error)
+	ValidateHold(ctx context.Context, holdID string) error
+	ConfirmHold(ctx context.Context, holdID string) error
+	CancelHold(ctx context.Context, holdID string) error
+}
 ```
+
+**Nota:** El port es minimalista. Los datos adicionales (user_id, items, payment_ref) son responsabilidad del adapter HTTP (`checkout/adapters/bookinghttp`).
+
+### 3.1 CreateHold
 
 **Propuesta para integración real (HTTP):**
 
@@ -212,26 +241,15 @@ Authorization: Bearer {api_key}
 }
 ```
 
-**Origen de datos en paku-commerce:**
-- `slot_id`: desde StartCheckoutInput
-- `user_id`: desde X-User-ID header
-- `service_items`: desde cart.Items (filtrar ItemTypeService)
-- `request_id`: desde X-Request-ID header o generado
-
-**PENDING:**
-- Agregar `pet_profile` si booking lo requiere para validar capacidad
-- Agregar `tenant_id` para multi-tenant
+**Mapeo de errores en adapter:**
+- 422 `slot_unavailable` → `bookinghttp.ErrSlotUnavailable`
+- 400 → `bookinghttp.ErrBookingBadRequest`
+- 503 → `bookinghttp.ErrBookingUnavailable`
+- Network timeout → `bookinghttp.ErrBookingUnavailable`
 
 ---
 
 ### 3.2 CancelHold
-
-**Method signature (port):**
-```go
-CancelHold(ctx context.Context, holdID string) error
-```
-
-**Propuesta para integración real (HTTP):**
 
 **Request:**
 ```http
@@ -263,27 +281,13 @@ Optional body:
 ```
 **Nota:** paku-commerce debe tratar 404 como success (idempotente).
 
-**Response 409 Conflict:**
-```json
-{
-  "error": {
-    "code": "hold_already_confirmed",
-    "message": "Cannot cancel confirmed hold"
-  }
-}
-```
-**Nota:** loggear como warning, indica inconsistencia de estado.
+**Mapeo en adapter:**
+- 200/404 → `nil` (idempotente)
+- 409 `hold_already_confirmed` → loggear WARNING, retornar `nil` (no bloquear)
 
 ---
 
 ### 3.3 ConfirmHold
-
-**Method signature (port):**
-```go
-ConfirmHold(ctx context.Context, holdID string) error
-```
-
-**Propuesta para integración real (HTTP):**
 
 **Request:**
 ```http
@@ -318,26 +322,11 @@ Authorization: Bearer {api_key}
 ```
 **Nota:** ERROR crítico en paku-commerce, abortar confirm-payment.
 
-**Response 410 Gone:**
-```json
-{
-  "error": {
-    "code": "hold_expired",
-    "message": "Hold expired before confirmation"
-  }
-}
-```
-**Nota:** ERROR crítico, el slot se perdió.
-
-**Response 200 OK (idempotente):**
-```json
-{
-  "booking_id": "booking_real_456",
-  "status": "confirmed",
-  "message": "Hold already confirmed"
-}
-```
-**Nota:** OK, retornar booking_id existente.
+**Mapeo en adapter:**
+- 200 → `nil`
+- 404 → `bookinghttp.ErrHoldNotFound`
+- 410 → `bookinghttp.ErrHoldExpired`
+- 503 → `bookinghttp.ErrBookingUnavailable`
 
 ---
 
@@ -404,7 +393,7 @@ Authorization: Bearer {api_key}
 - No crear hold duplicado
 - Mismo TTL del hold original
 
-**Implementación booking:**
+**Implementación paku-booking:**
 - Store request_id por 24h
 - Si request_id existe → retornar hold_id del registro existente
 
@@ -430,7 +419,7 @@ Authorization: Bearer {api_key}
 - Si hold ya confirmado con diferente payment_ref → 409 conflict
 - No crear booking duplicado
 
-**Implementación booking:**
+**Implementación paku-booking:**
 - Store payment_ref en booking record
 - Validar payment_ref match en reintentos
 
@@ -448,9 +437,25 @@ Authorization: Bearer {api_key}
 ### Campos de logging en paku-commerce
 
 **CreateHold:**
+- `request_id`: X-Request-ID
+- `user_id`: X-User-ID
+- `slot_id`: slot_id
+- `service_items`: items de servicio
+- `error`: en caso de falla
 
+**CancelHold:**
+- `request_id`: X-Request-ID
+- `hold_id`: hold_id
+- `error`: en caso de falla
 
+**ConfirmHold:**
+- `request_id`: X-Request-ID
+- `hold_id`: hold_id
+- `order_id`: order.ID
+- `payment_ref`: referencia de pago
+- `error`: en caso de falla
 
+---
 
 ## 7) Estado del contrato
 

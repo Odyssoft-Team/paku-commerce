@@ -89,6 +89,18 @@ func TestExpireCarts_DeletesExpired(t *testing.T) {
 // Stubs para tests
 type stubBookingClient struct{}
 
+func (s *stubBookingClient) CreateHold(ctx context.Context, slotID string) (string, error) {
+	return "", nil
+}
+
+func (s *stubBookingClient) ValidateHold(ctx context.Context, holdID string) error {
+	return nil
+}
+
+func (s *stubBookingClient) ConfirmHold(ctx context.Context, holdID string) error {
+	return nil
+}
+
 func (s *stubBookingClient) CancelHold(ctx context.Context, holdID string) error {
 	return nil
 }

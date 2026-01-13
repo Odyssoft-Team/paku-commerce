@@ -5,7 +5,7 @@ import (
 
 	cartdomain "paku-commerce/internal/commerce/cart/domain"
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
-	bookingports "paku-commerce/internal/commerce/checkout/ports/booking"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 )
 
 // StartCheckoutInput contiene user_id y slot_id.
@@ -24,7 +24,7 @@ type StartCheckoutOutput struct {
 // StartCheckout inicia el checkout creando hold, order y actualizando cart.
 type StartCheckout struct {
 	CartRepo      cartdomain.CartRepository
-	Booking       bookingports.BookingClient
+	Booking       platformbooking.Client
 	CreateOrderUC *CreateOrder
 }
 

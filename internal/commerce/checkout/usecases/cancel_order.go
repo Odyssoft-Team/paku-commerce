@@ -4,7 +4,7 @@ import (
 	"context"
 
 	checkoutdomain "paku-commerce/internal/commerce/checkout/domain"
-	bookingports "paku-commerce/internal/commerce/checkout/ports/booking"
+	platformbooking "paku-commerce/internal/commerce/platform/booking"
 )
 
 // CancelOrderInput contiene el ID de la orden a cancelar.
@@ -20,7 +20,7 @@ type CancelOrderOutput struct {
 // CancelOrder cancela una orden de forma idempotente.
 type CancelOrder struct {
 	Repo    checkoutdomain.OrderRepository
-	Booking bookingports.BookingClient
+	Booking platformbooking.Client
 }
 
 // Execute cancela la orden y libera el hold de booking si existe.
