@@ -20,13 +20,13 @@ func NewRouter() http.Handler {
 		w.Write([]byte("ok"))
 	})
 
-	// Swagger UI
-	r.Get("/api/v1/commerce/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("/api/v1/commerce/swagger/doc.json"),
-	))
-
 	// API routes bajo /api/v1/commerce
 	r.Route("/api/v1/commerce", func(r chi.Router) {
+		// Swagger UI - DENTRO del route group
+		r.Get("/swagger/*", httpSwagger.Handler(
+			httpSwagger.URL("/api/v1/commerce/swagger/doc.json"),
+		))
+
 		// Registrar rutas de checkout
 		checkoutHandlers := checkouthttp.WireCheckoutHandlers()
 		checkouthttp.RegisterRoutes(r, checkoutHandlers)
