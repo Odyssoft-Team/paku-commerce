@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	// Importar docs generados por swag
+	_ "paku-commerce/docs" // ⬅️ CRÍTICO: debe estar presente
 	"paku-commerce/pkg/server"
 )
 
@@ -26,7 +26,7 @@ import (
 // @license.url   http://paku.pe/license
 
 // @host      localhost:8080
-// @BasePath  /api/v1/commerce
+// @BasePath  /
 
 // @securityDefinitions.apikey UserID
 // @in header

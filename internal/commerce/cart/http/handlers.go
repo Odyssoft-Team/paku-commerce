@@ -29,7 +29,7 @@ type CartHandlers struct {
 // @Success      200        {object}  CartResponseDTO
 // @Failure      400        {object}  ErrorResponse
 // @Failure      500        {object}  ErrorResponse
-// @Router       /cart/me [put]
+// @Router       /api/v1/commerce/cart/me [put]
 // @Security     UserID
 func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
@@ -78,7 +78,7 @@ func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) 
 // @Success      200        {object}  CartResponseDTO
 // @Failure      404        {object}  ErrorResponse
 // @Failure      500        {object}  ErrorResponse
-// @Router       /cart/me [get]
+// @Router       /api/v1/commerce/cart/me [get]
 // @Security     UserID
 func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
@@ -106,7 +106,7 @@ func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 // @Param        X-User-ID  header  string  true  "User ID"
 // @Success      204        "No Content"
 // @Failure      500        {object}  ErrorResponse
-// @Router       /cart/me [delete]
+// @Router       /api/v1/commerce/cart/me [delete]
 // @Security     UserID
 func (h *CartHandlers) HandleDeleteCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
@@ -136,7 +136,7 @@ func (h *CartHandlers) HandleDeleteCart(w http.ResponseWriter, r *http.Request) 
 // @Success      200   {object}  ExpireResponseDTO
 // @Failure      400   {object}  ErrorResponse
 // @Failure      500   {object}  ErrorResponse
-// @Router       /cart/expire [post]
+// @Router       /api/v1/commerce/cart/expire [post]
 func (h *CartHandlers) HandleExpireCarts(w http.ResponseWriter, r *http.Request) {
 	var req ExpireRequestDTO
 

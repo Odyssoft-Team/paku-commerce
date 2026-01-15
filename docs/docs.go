@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/cart/expire": {
+        "/api/v1/commerce/cart/expire": {
             "post": {
                 "description": "Expirar carritos vencidos (dev/admin)",
                 "consumes": [
@@ -68,7 +68,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/cart/me": {
+        "/api/v1/commerce/cart/me": {
             "get": {
                 "security": [
                     {
@@ -202,7 +202,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/checkout/orders": {
+        "/api/v1/commerce/checkout/orders": {
             "post": {
                 "description": "Crear una orden pending_payment",
                 "consumes": [
@@ -254,7 +254,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/checkout/orders/{id}/confirm-payment": {
+        "/api/v1/commerce/checkout/orders/{id}/confirm-payment": {
             "post": {
                 "description": "Confirmar el pago de una orden",
                 "consumes": [
@@ -313,7 +313,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/checkout/quote": {
+        "/api/v1/commerce/checkout/quote": {
             "post": {
                 "description": "Cotizar un checkout sin crear orden",
                 "consumes": [
@@ -365,7 +365,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/checkout/start": {
+        "/api/v1/commerce/checkout/start": {
             "post": {
                 "security": [
                     {
@@ -806,7 +806,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1/commerce",
+	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Paku Commerce API",
 	Description:      "API de comercio para servicios y productos de Paku",

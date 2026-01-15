@@ -31,7 +31,7 @@ type CheckoutHandlers struct {
 // @Failure      400   {object}  ErrorResponse
 // @Failure      422   {object}  ErrorResponse
 // @Failure      500   {object}  ErrorResponse
-// @Router       /checkout/quote [post]
+// @Router       /api/v1/commerce/checkout/quote [post]
 func (h *CheckoutHandlers) HandleQuote(w http.ResponseWriter, r *http.Request) {
 	var req QuoteRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -95,7 +95,7 @@ func (h *CheckoutHandlers) HandleQuote(w http.ResponseWriter, r *http.Request) {
 // @Failure      400   {object}  ErrorResponse
 // @Failure      422   {object}  ErrorResponse
 // @Failure      500   {object}  ErrorResponse
-// @Router       /checkout/orders [post]
+// @Router       /api/v1/commerce/checkout/orders [post]
 func (h *CheckoutHandlers) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req QuoteRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -145,7 +145,7 @@ func (h *CheckoutHandlers) HandleCreateOrder(w http.ResponseWriter, r *http.Requ
 // @Failure      400   {object}  ErrorResponse
 // @Failure      404   {object}  ErrorResponse
 // @Failure      500   {object}  ErrorResponse
-// @Router       /checkout/orders/{id}/confirm-payment [post]
+// @Router       /api/v1/commerce/checkout/orders/{id}/confirm-payment [post]
 func (h *CheckoutHandlers) HandleConfirmPayment(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "id")
 	if orderID == "" {
@@ -208,7 +208,7 @@ func (h *CheckoutHandlers) HandleConfirmPayment(w http.ResponseWriter, r *http.R
 // @Success      200        {object}  StartCheckoutResponseDTO
 // @Failure      400        {object}  ErrorResponse
 // @Failure      500        {object}  ErrorResponse
-// @Router       /checkout/start [post]
+// @Router       /api/v1/commerce/checkout/start [post]
 // @Security     UserID
 func (h *CheckoutHandlers) HandleStartCheckout(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")

@@ -1,4 +1,4 @@
-basePath: /api/v1/commerce
+basePath: /
 definitions:
   internal_commerce_cart_http.CartDTO:
     properties:
@@ -250,7 +250,7 @@ info:
   title: Paku Commerce API
   version: "1.0"
 paths:
-  /cart/expire:
+  /api/v1/commerce/cart/expire:
     post:
       consumes:
       - application/json
@@ -279,7 +279,7 @@ paths:
       summary: Expire carts
       tags:
       - cart
-  /cart/me:
+  /api/v1/commerce/cart/me:
     delete:
       description: Eliminar el carrito del usuario
       parameters:
@@ -364,7 +364,7 @@ paths:
       summary: Upsert cart
       tags:
       - cart
-  /checkout/orders:
+  /api/v1/commerce/checkout/orders:
     post:
       consumes:
       - application/json
@@ -398,7 +398,7 @@ paths:
       summary: Create order
       tags:
       - checkout
-  /checkout/orders/{id}/confirm-payment:
+  /api/v1/commerce/checkout/orders/{id}/confirm-payment:
     post:
       consumes:
       - application/json
@@ -437,7 +437,7 @@ paths:
       summary: Confirm payment
       tags:
       - checkout
-  /checkout/quote:
+  /api/v1/commerce/checkout/quote:
     post:
       consumes:
       - application/json
@@ -471,7 +471,7 @@ paths:
       summary: Quote checkout
       tags:
       - checkout
-  /checkout/start:
+  /api/v1/commerce/checkout/start:
     post:
       consumes:
       - application/json

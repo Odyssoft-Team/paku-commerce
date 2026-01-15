@@ -15,9 +15,9 @@
         "version": "1.0"
     },
     "host": "localhost:8080",
-    "basePath": "/api/v1/commerce",
+    "basePath": "/",
     "paths": {
-        "/cart/expire": {
+        "/api/v1/commerce/cart/expire": {
             "post": {
                 "description": "Expirar carritos vencidos (dev/admin)",
                 "consumes": [
@@ -62,7 +62,7 @@
                 }
             }
         },
-        "/cart/me": {
+        "/api/v1/commerce/cart/me": {
             "get": {
                 "security": [
                     {
@@ -196,7 +196,7 @@
                 }
             }
         },
-        "/checkout/orders": {
+        "/api/v1/commerce/checkout/orders": {
             "post": {
                 "description": "Crear una orden pending_payment",
                 "consumes": [
@@ -248,7 +248,7 @@
                 }
             }
         },
-        "/checkout/orders/{id}/confirm-payment": {
+        "/api/v1/commerce/checkout/orders/{id}/confirm-payment": {
             "post": {
                 "description": "Confirmar el pago de una orden",
                 "consumes": [
@@ -307,7 +307,7 @@
                 }
             }
         },
-        "/checkout/quote": {
+        "/api/v1/commerce/checkout/quote": {
             "post": {
                 "description": "Cotizar un checkout sin crear orden",
                 "consumes": [
@@ -359,7 +359,7 @@
                 }
             }
         },
-        "/checkout/start": {
+        "/api/v1/commerce/checkout/start": {
             "post": {
                 "security": [
                     {
