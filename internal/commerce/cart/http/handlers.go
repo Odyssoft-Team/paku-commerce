@@ -19,6 +19,18 @@ type CartHandlers struct {
 }
 
 // HandleUpsertCart maneja PUT /cart/me.
+// @Summary      Upsert cart
+// @Description  Crear o actualizar el carrito del usuario
+// @Tags         cart
+// @Accept       json
+// @Produce      json
+// @Param        X-User-ID  header    string              true  "User ID"
+// @Param        body       body      UpsertCartRequestDTO  true  "Cart data"
+// @Success      200        {object}  CartResponseDTO
+// @Failure      400        {object}  ErrorResponse
+// @Failure      500        {object}  ErrorResponse
+// @Router       /cart/me [put]
+// @Security     UserID
 func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
@@ -58,6 +70,16 @@ func (h *CartHandlers) HandleUpsertCart(w http.ResponseWriter, r *http.Request) 
 }
 
 // HandleGetCart maneja GET /cart/me.
+// @Summary      Get cart
+// @Description  Obtener el carrito del usuario
+// @Tags         cart
+// @Produce      json
+// @Param        X-User-ID  header    string  true  "User ID"
+// @Success      200        {object}  CartResponseDTO
+// @Failure      404        {object}  ErrorResponse
+// @Failure      500        {object}  ErrorResponse
+// @Router       /cart/me [get]
+// @Security     UserID
 func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
@@ -78,6 +100,14 @@ func (h *CartHandlers) HandleGetCart(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleDeleteCart maneja DELETE /cart/me.
+// @Summary      Delete cart
+// @Description  Eliminar el carrito del usuario
+// @Tags         cart
+// @Param        X-User-ID  header  string  true  "User ID"
+// @Success      204        "No Content"
+// @Failure      500        {object}  ErrorResponse
+// @Router       /cart/me [delete]
+// @Security     UserID
 func (h *CartHandlers) HandleDeleteCart(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {
@@ -97,6 +127,16 @@ func (h *CartHandlers) HandleDeleteCart(w http.ResponseWriter, r *http.Request) 
 }
 
 // HandleExpireCarts maneja POST /cart/expire.
+// @Summary      Expire carts
+// @Description  Expirar carritos vencidos (dev/admin)
+// @Tags         cart
+// @Accept       json
+// @Produce      json
+// @Param        body  body      ExpireRequestDTO  false  "Optional timestamp"
+// @Success      200   {object}  ExpireResponseDTO
+// @Failure      400   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
+// @Router       /cart/expire [post]
 func (h *CartHandlers) HandleExpireCarts(w http.ResponseWriter, r *http.Request) {
 	var req ExpireRequestDTO
 

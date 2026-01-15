@@ -21,6 +21,17 @@ type CheckoutHandlers struct {
 }
 
 // HandleQuote maneja POST /checkout/quote.
+// @Summary      Quote checkout
+// @Description  Cotizar un checkout sin crear orden
+// @Tags         checkout
+// @Accept       json
+// @Produce      json
+// @Param        body  body      QuoteRequestDTO  true  "Quote request"
+// @Success      200   {object}  QuoteResponseDTO
+// @Failure      400   {object}  ErrorResponse
+// @Failure      422   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
+// @Router       /checkout/quote [post]
 func (h *CheckoutHandlers) HandleQuote(w http.ResponseWriter, r *http.Request) {
 	var req QuoteRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -74,6 +85,17 @@ func (h *CheckoutHandlers) HandleQuote(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandleCreateOrder maneja POST /checkout/orders.
+// @Summary      Create order
+// @Description  Crear una orden pending_payment
+// @Tags         checkout
+// @Accept       json
+// @Produce      json
+// @Param        body  body      QuoteRequestDTO  true  "Order request"
+// @Success      201   {object}  CreateOrderResponseDTO
+// @Failure      400   {object}  ErrorResponse
+// @Failure      422   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
+// @Router       /checkout/orders [post]
 func (h *CheckoutHandlers) HandleCreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req QuoteRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -112,6 +134,18 @@ func (h *CheckoutHandlers) HandleCreateOrder(w http.ResponseWriter, r *http.Requ
 }
 
 // HandleConfirmPayment maneja POST /checkout/orders/{id}/confirm-payment.
+// @Summary      Confirm payment
+// @Description  Confirmar el pago de una orden
+// @Tags         checkout
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                    true  "Order ID"
+// @Param        body  body      ConfirmPaymentRequestDTO  true  "Payment confirmation"
+// @Success      200   {object}  ConfirmPaymentResponseDTO
+// @Failure      400   {object}  ErrorResponse
+// @Failure      404   {object}  ErrorResponse
+// @Failure      500   {object}  ErrorResponse
+// @Router       /checkout/orders/{id}/confirm-payment [post]
 func (h *CheckoutHandlers) HandleConfirmPayment(w http.ResponseWriter, r *http.Request) {
 	orderID := chi.URLParam(r, "id")
 	if orderID == "" {
@@ -164,6 +198,18 @@ func (h *CheckoutHandlers) HandleConfirmPayment(w http.ResponseWriter, r *http.R
 }
 
 // HandleStartCheckout maneja POST /checkout/start.
+// @Summary      Start checkout
+// @Description  Iniciar checkout (crear hold + order + actualizar cart)
+// @Tags         checkout
+// @Accept       json
+// @Produce      json
+// @Param        X-User-ID  header    string                   true  "User ID"
+// @Param        body       body      StartCheckoutRequestDTO  true  "Start checkout request"
+// @Success      200        {object}  StartCheckoutResponseDTO
+// @Failure      400        {object}  ErrorResponse
+// @Failure      500        {object}  ErrorResponse
+// @Router       /checkout/start [post]
+// @Security     UserID
 func (h *CheckoutHandlers) HandleStartCheckout(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("X-User-ID")
 	if userID == "" {

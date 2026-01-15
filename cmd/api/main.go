@@ -9,8 +9,29 @@ import (
 	"syscall"
 	"time"
 
+	// Importar docs generados por swag
 	"paku-commerce/pkg/server"
 )
+
+// @title           Paku Commerce API
+// @version         1.0
+// @description     API de comercio para servicios y productos de Paku
+// @termsOfService  http://paku.pe/terms/
+
+/// @contact.name   Paku Support
+// @contact.url    http://paku.pe/support
+// @contact.email  support@paku.pe
+
+// @license.name  Proprietary
+// @license.url   http://paku.pe/license
+
+// @host      localhost:8080
+// @BasePath  /api/v1/commerce
+
+// @securityDefinitions.apikey UserID
+// @in header
+// @name X-User-ID
+// @description User ID header for authentication (dev only)
 
 func main() {
 	port := os.Getenv("PORT")

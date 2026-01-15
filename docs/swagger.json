@@ -1,0 +1,797 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API de comercio para servicios y productos de Paku",
+        "title": "Paku Commerce API",
+        "termsOfService": "http://paku.pe/terms/",
+        "contact": {
+            "url": "http://paku.pe/support",
+            "email": "support@paku.pe"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "http://paku.pe/license"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1/commerce",
+    "paths": {
+        "/cart/expire": {
+            "post": {
+                "description": "Expirar carritos vencidos (dev/admin)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Expire carts",
+                "parameters": [
+                    {
+                        "description": "Optional timestamp",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ExpireRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ExpireResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/cart/me": {
+            "get": {
+                "security": [
+                    {
+                        "UserID": []
+                    }
+                ],
+                "description": "Obtener el carrito del usuario",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Get cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "X-User-ID",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.CartResponseDTO"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "UserID": []
+                    }
+                ],
+                "description": "Crear o actualizar el carrito del usuario",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Upsert cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "X-User-ID",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Cart data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.UpsertCartRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.CartResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "UserID": []
+                    }
+                ],
+                "description": "Eliminar el carrito del usuario",
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Delete cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "X-User-ID",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_cart_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/checkout/orders": {
+            "post": {
+                "description": "Crear una orden pending_payment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checkout"
+                ],
+                "summary": "Create order",
+                "parameters": [
+                    {
+                        "description": "Order request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.QuoteRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.CreateOrderResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/checkout/orders/{id}/confirm-payment": {
+            "post": {
+                "description": "Confirmar el pago de una orden",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checkout"
+                ],
+                "summary": "Confirm payment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Payment confirmation",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ConfirmPaymentRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ConfirmPaymentResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/checkout/quote": {
+            "post": {
+                "description": "Cotizar un checkout sin crear orden",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checkout"
+                ],
+                "summary": "Quote checkout",
+                "parameters": [
+                    {
+                        "description": "Quote request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.QuoteRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.QuoteResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/checkout/start": {
+            "post": {
+                "security": [
+                    {
+                        "UserID": []
+                    }
+                ],
+                "description": "Iniciar checkout (crear hold + order + actualizar cart)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "checkout"
+                ],
+                "summary": "Start checkout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "X-User-ID",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Start checkout request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.StartCheckoutRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.StartCheckoutResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/internal_commerce_checkout_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "internal_commerce_cart_http.CartDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_commerce_cart_http.ItemDTO"
+                    }
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "pet_profile": {
+                    "$ref": "#/definitions/internal_commerce_cart_http.PetProfileDTO"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_cart_http.CartResponseDTO": {
+            "type": "object",
+            "properties": {
+                "cart": {
+                    "$ref": "#/definitions/internal_commerce_cart_http.CartDTO"
+                }
+            }
+        },
+        "internal_commerce_cart_http.ErrorDTO": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_cart_http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "$ref": "#/definitions/internal_commerce_cart_http.ErrorDTO"
+                }
+            }
+        },
+        "internal_commerce_cart_http.ExpireRequestDTO": {
+            "type": "object",
+            "properties": {
+                "now": {
+                    "description": "RFC3339",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_cart_http.ExpireResponseDTO": {
+            "type": "object",
+            "properties": {
+                "expired_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_commerce_cart_http.ItemDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "qty": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_cart_http.PetProfileDTO": {
+            "type": "object",
+            "properties": {
+                "coat_type": {
+                    "type": "string"
+                },
+                "species": {
+                    "type": "string"
+                },
+                "weight_kg": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_commerce_cart_http.UpsertCartRequestDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_commerce_cart_http.ItemDTO"
+                    }
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "pet_profile": {
+                    "$ref": "#/definitions/internal_commerce_cart_http.PetProfileDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.CartSnapshotDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "order_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.ConfirmPaymentRequestDTO": {
+            "type": "object",
+            "properties": {
+                "paid_at": {
+                    "description": "ISO8601",
+                    "type": "string"
+                },
+                "payment_ref": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.ConfirmPaymentResponseDTO": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.OrderDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.CreateOrderResponseDTO": {
+            "type": "object",
+            "properties": {
+                "order": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.OrderDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.DiscountLineDTO": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source": {
+                    "description": "\"coupon\" | \"promotion\"",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.ItemDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "qty": {
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "\"service\" | \"product\"",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.MoneyDTO": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "currency": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.OrderDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "coupon_code": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_commerce_checkout_http.OrderItemDTO"
+                    }
+                },
+                "paid_at": {
+                    "type": "string"
+                },
+                "payment_ref": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "subtotal": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "total": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "total_discount": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.OrderItemDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "line_total": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "qty": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unit_price": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.PetProfileDTO": {
+            "type": "object",
+            "properties": {
+                "coat_type": {
+                    "type": "string"
+                },
+                "species": {
+                    "type": "string"
+                },
+                "weight_kg": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.QuoteDTO": {
+            "type": "object",
+            "properties": {
+                "discounts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_commerce_checkout_http.DiscountLineDTO"
+                    }
+                },
+                "subtotal": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "total": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                },
+                "total_discount": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.MoneyDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.QuoteRequestDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "coupon_code": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_commerce_checkout_http.ItemDTO"
+                    }
+                },
+                "pet_profile": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.PetProfileDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.QuoteResponseDTO": {
+            "type": "object",
+            "properties": {
+                "quote": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.QuoteDTO"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.StartCheckoutRequestDTO": {
+            "type": "object",
+            "properties": {
+                "slot_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_commerce_checkout_http.StartCheckoutResponseDTO": {
+            "type": "object",
+            "properties": {
+                "booking_hold_id": {
+                    "type": "string"
+                },
+                "cart": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.CartSnapshotDTO"
+                },
+                "order": {
+                    "$ref": "#/definitions/internal_commerce_checkout_http.OrderDTO"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "UserID": {
+            "description": "User ID header for authentication (dev only)",
+            "type": "apiKey",
+            "name": "X-User-ID",
+            "in": "header"
+        }
+    }
+}

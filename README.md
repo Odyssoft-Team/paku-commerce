@@ -147,3 +147,15 @@ go test ./internal/commerce/checkout/http -v -run TestHTTP_E2E
 ### Próximos pasos
 Ver `docs/SCOPE_V1.md` y `docs/TASKS.md` para roadmap.
 
+### Documentación API (Swagger)
+
+**Generar documentación:**
+```bash
+swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal
+```
+
+**Acceder a Swagger UI:**
+```bash
+http://localhost:8080/swagger/index.html
+```
+

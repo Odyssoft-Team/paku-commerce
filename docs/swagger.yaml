@@ -1,0 +1,517 @@
+basePath: /api/v1/commerce
+definitions:
+  internal_commerce_cart_http.CartDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/internal_commerce_cart_http.ItemDTO'
+        type: array
+      order_id:
+        type: string
+      pet_profile:
+        $ref: '#/definitions/internal_commerce_cart_http.PetProfileDTO'
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  internal_commerce_cart_http.CartResponseDTO:
+    properties:
+      cart:
+        $ref: '#/definitions/internal_commerce_cart_http.CartDTO'
+    type: object
+  internal_commerce_cart_http.ErrorDTO:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  internal_commerce_cart_http.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/internal_commerce_cart_http.ErrorDTO'
+    type: object
+  internal_commerce_cart_http.ExpireRequestDTO:
+    properties:
+      now:
+        description: RFC3339
+        type: string
+    type: object
+  internal_commerce_cart_http.ExpireResponseDTO:
+    properties:
+      expired_count:
+        type: integer
+    type: object
+  internal_commerce_cart_http.ItemDTO:
+    properties:
+      id:
+        type: string
+      qty:
+        type: integer
+      type:
+        type: string
+    type: object
+  internal_commerce_cart_http.PetProfileDTO:
+    properties:
+      coat_type:
+        type: string
+      species:
+        type: string
+      weight_kg:
+        type: integer
+    type: object
+  internal_commerce_cart_http.UpsertCartRequestDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/internal_commerce_cart_http.ItemDTO'
+        type: array
+      order_id:
+        type: string
+      pet_profile:
+        $ref: '#/definitions/internal_commerce_cart_http.PetProfileDTO'
+    type: object
+  internal_commerce_checkout_http.CartSnapshotDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      user_id:
+        type: string
+    type: object
+  internal_commerce_checkout_http.ConfirmPaymentRequestDTO:
+    properties:
+      paid_at:
+        description: ISO8601
+        type: string
+      payment_ref:
+        type: string
+    type: object
+  internal_commerce_checkout_http.ConfirmPaymentResponseDTO:
+    properties:
+      order:
+        $ref: '#/definitions/internal_commerce_checkout_http.OrderDTO'
+    type: object
+  internal_commerce_checkout_http.CreateOrderResponseDTO:
+    properties:
+      order:
+        $ref: '#/definitions/internal_commerce_checkout_http.OrderDTO'
+    type: object
+  internal_commerce_checkout_http.DiscountLineDTO:
+    properties:
+      amount:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      name:
+        type: string
+      source:
+        description: '"coupon" | "promotion"'
+        type: string
+    type: object
+  internal_commerce_checkout_http.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  internal_commerce_checkout_http.ItemDTO:
+    properties:
+      id:
+        type: string
+      qty:
+        type: integer
+      type:
+        description: '"service" | "product"'
+        type: string
+    type: object
+  internal_commerce_checkout_http.MoneyDTO:
+    properties:
+      amount:
+        type: integer
+      currency:
+        type: string
+    type: object
+  internal_commerce_checkout_http.OrderDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      coupon_code:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/internal_commerce_checkout_http.OrderItemDTO'
+        type: array
+      paid_at:
+        type: string
+      payment_ref:
+        type: string
+      status:
+        type: string
+      subtotal:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      total:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      total_discount:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+    type: object
+  internal_commerce_checkout_http.OrderItemDTO:
+    properties:
+      id:
+        type: string
+      line_total:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      qty:
+        type: integer
+      type:
+        type: string
+      unit_price:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+    type: object
+  internal_commerce_checkout_http.PetProfileDTO:
+    properties:
+      coat_type:
+        type: string
+      species:
+        type: string
+      weight_kg:
+        type: integer
+    type: object
+  internal_commerce_checkout_http.QuoteDTO:
+    properties:
+      discounts:
+        items:
+          $ref: '#/definitions/internal_commerce_checkout_http.DiscountLineDTO'
+        type: array
+      subtotal:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      total:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+      total_discount:
+        $ref: '#/definitions/internal_commerce_checkout_http.MoneyDTO'
+    type: object
+  internal_commerce_checkout_http.QuoteRequestDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      coupon_code:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/internal_commerce_checkout_http.ItemDTO'
+        type: array
+      pet_profile:
+        $ref: '#/definitions/internal_commerce_checkout_http.PetProfileDTO'
+    type: object
+  internal_commerce_checkout_http.QuoteResponseDTO:
+    properties:
+      quote:
+        $ref: '#/definitions/internal_commerce_checkout_http.QuoteDTO'
+    type: object
+  internal_commerce_checkout_http.StartCheckoutRequestDTO:
+    properties:
+      slot_id:
+        type: string
+    type: object
+  internal_commerce_checkout_http.StartCheckoutResponseDTO:
+    properties:
+      booking_hold_id:
+        type: string
+      cart:
+        $ref: '#/definitions/internal_commerce_checkout_http.CartSnapshotDTO'
+      order:
+        $ref: '#/definitions/internal_commerce_checkout_http.OrderDTO'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@paku.pe
+    url: http://paku.pe/support
+  description: API de comercio para servicios y productos de Paku
+  license:
+    name: Proprietary
+    url: http://paku.pe/license
+  termsOfService: http://paku.pe/terms/
+  title: Paku Commerce API
+  version: "1.0"
+paths:
+  /cart/expire:
+    post:
+      consumes:
+      - application/json
+      description: Expirar carritos vencidos (dev/admin)
+      parameters:
+      - description: Optional timestamp
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/internal_commerce_cart_http.ExpireRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ExpireResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+      summary: Expire carts
+      tags:
+      - cart
+  /cart/me:
+    delete:
+      description: Eliminar el carrito del usuario
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+      security:
+      - UserID: []
+      summary: Delete cart
+      tags:
+      - cart
+    get:
+      description: Obtener el carrito del usuario
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.CartResponseDTO'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+      security:
+      - UserID: []
+      summary: Get cart
+      tags:
+      - cart
+    put:
+      consumes:
+      - application/json
+      description: Crear o actualizar el carrito del usuario
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: string
+      - description: Cart data
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_commerce_cart_http.UpsertCartRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.CartResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_cart_http.ErrorResponse'
+      security:
+      - UserID: []
+      summary: Upsert cart
+      tags:
+      - cart
+  /checkout/orders:
+    post:
+      consumes:
+      - application/json
+      description: Crear una orden pending_payment
+      parameters:
+      - description: Order request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_commerce_checkout_http.QuoteRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.CreateOrderResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+      summary: Create order
+      tags:
+      - checkout
+  /checkout/orders/{id}/confirm-payment:
+    post:
+      consumes:
+      - application/json
+      description: Confirmar el pago de una orden
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Payment confirmation
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_commerce_checkout_http.ConfirmPaymentRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ConfirmPaymentResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+      summary: Confirm payment
+      tags:
+      - checkout
+  /checkout/quote:
+    post:
+      consumes:
+      - application/json
+      description: Cotizar un checkout sin crear orden
+      parameters:
+      - description: Quote request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_commerce_checkout_http.QuoteRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.QuoteResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+      summary: Quote checkout
+      tags:
+      - checkout
+  /checkout/start:
+    post:
+      consumes:
+      - application/json
+      description: Iniciar checkout (crear hold + order + actualizar cart)
+      parameters:
+      - description: User ID
+        in: header
+        name: X-User-ID
+        required: true
+        type: string
+      - description: Start checkout request
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_commerce_checkout_http.StartCheckoutRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.StartCheckoutResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_commerce_checkout_http.ErrorResponse'
+      security:
+      - UserID: []
+      summary: Start checkout
+      tags:
+      - checkout
+securityDefinitions:
+  UserID:
+    description: User ID header for authentication (dev only)
+    in: header
+    name: X-User-ID
+    type: apiKey
+swagger: "2.0"
